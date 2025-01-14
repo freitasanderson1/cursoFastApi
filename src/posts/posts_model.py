@@ -1,16 +1,12 @@
-from pydantic import BaseModel
-from datetime import datetime, UTC
+import sqlalchemy as sa
+from database import metadata
 
-class PostsRequest(BaseModel):
-  title: str
-  content: str
-  published_at: datetime = datetime.now(UTC)
-  published: bool = False
-
-
-class PostsResponse(BaseModel):
-  id: int
-  title: str
-  content: str
-  published_at: datetime| None
-  published: bool
+Post = sa.Table(
+  'posts', 
+  metadata, 
+  sa.Column('id', sa.Integer, primary_key=True, nullable=False),
+  sa.Column('title', sa.String(150), nullable=False, unique=True),
+  sa.Column('content', sa.String, nullable=False),
+  sa.Column('published_at', sa.DateTime, nullable=True),
+  sa.Column('published', sa.Boolean, default=False),
+)

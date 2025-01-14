@@ -1,19 +1,35 @@
-from fastapi import APIRouter
-from datetime import datetime, UTC
-from posts.posts_model import PostsRequest
+from fastapi import APIRouter, Response, status
+
+from posts.posts_serializer import PostsRequest, PostsResponse
+from posts.posts_model import Post
+
+from database import database
 
 router = APIRouter(prefix='/posts')
 
-@router.get("/")
-def read_root():
-  return {"msg": "Hello World!"}
+@router.get("/", response_model=list[PostsResponse])
+async def read_post(response: Response, published: bool, limit:int, skip:int = 0):
+  query = Post.select()
+  return await database.fetch_all(query)
 
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=PostsResponse)
+async def create_post(post: PostsRequest):
+  command = Post.insert().values(
+    title=post.title, 
+    content=post.content, 
+    published_at=post.published_at, 
+    published=post.published,
+  )
 
-@router.get("/{post_type}")
-def read_post(post_type: int):
-  return {"posts": [{'title':f'post {post_type}', 'date':datetime.now(UTC)}]}
+  last_id = await database.execute(command)
+  return {**post.model_dump(), "id": last_id}
 
-
-@router.post("/{post_id}")
-def create_post(post_id: int, post: PostsRequest):
-  return {"post_name": PostsRequest.name, "post_id": post_id}
+@router.patch("/{post_id}", status_code=status.HTTP_202_ACCEPTED, response_model=PostsResponse)
+async def update_post(post_id:str, post: PostsRequest):
+  command = Post.update().where(id=post_id).values(
+    title=post.title, 
+    content=post.content, 
+    published_at=post.published_at, 
+    published=post.published,  
+  )
+  return await database.execute(command)  
