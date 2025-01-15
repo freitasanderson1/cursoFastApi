@@ -1,0 +1,2 @@
+from posts.serializers.PostRequest import PostsRequest
+from posts.serializers.PostResponse import PostsResponse

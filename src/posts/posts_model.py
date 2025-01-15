@@ -9,4 +9,5 @@ Post = sa.Table(
   sa.Column('content', sa.String, nullable=False),
   sa.Column('published_at', sa.DateTime, nullable=True),
   sa.Column('published', sa.Boolean, default=False),
+  sa.Column('active', sa.Boolean, default=True),
 )

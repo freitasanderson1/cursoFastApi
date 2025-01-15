@@ -6,11 +6,4 @@ class PostsRequest(BaseModel):
   content: str
   published_at: datetime = datetime.now(UTC)
   published: bool = False
-
-
-class PostsResponse(BaseModel):
-  id: int
-  title: str
-  content: str
-  published_at: datetime| None
-  published: bool
+  active: bool = True
