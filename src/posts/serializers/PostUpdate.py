@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from datetime import datetime, UTC
+from datetime import datetime
 
 class PostUpdate(BaseModel):
   title: str | None = None

@@ -7,4 +7,4 @@ class PostDelete(BaseModel):
   content: str
   published_at: datetime| None
   published: bool
-  active: bool
+  active: bool = False
