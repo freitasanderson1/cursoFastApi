@@ -1,4 +1,6 @@
 from fastapi import APIRouter, status
+from typing import Annotated
+
 from posts.serializers import PostsRequest, PostsResponse, PostUpdate
 from posts.services import PostService
 
@@ -12,6 +14,8 @@ async def read_post(limit:int = 0, skip:int = 0, published: bool = True, active:
 
 @router.get("/{post_id}", status_code=status.HTTP_200_OK, response_model=PostsResponse)
 async def read_post(post_id: str):
+  # token = request.headers.get('authorization')
+
   return await service.read(post_id)
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=PostsResponse)
