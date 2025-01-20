@@ -31,6 +31,8 @@ class UserServices:
     if userExists:
       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Usuário já existe!")
     
+    user.username = user.username.lower()
+
     hashed_User = copy.deepcopy(user)
     hashed_User.password = hash_password.hash(user.password)
     hashed_User.is_admin = False

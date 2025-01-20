@@ -13,20 +13,34 @@ class Auth:
   def generate_access_token(self, userDict: LoginRequest) -> str:
     jwtUserDict = dict(userDict)
     jwtUserDict["expires_at"] = self.expires_at()
+    jwtUserDict["signned"] = True
+
     token = jwt.encode(jwtUserDict, JWT_SECRET, algorithm="HS256")
+
     return token
   
-  def decode_access_token(self, token: str) -> dict:
-    decodeDict = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-    parserDatetime = datetime.strftime(decodeDict.get("expires_at"))
-    
-    print(f'parserDatetime: {parserDatetime}')
+  async def decode_access_token(self, token: str) -> dict:
+    decodeDict = jwt.decode(token, key=JWT_SECRET, algorithms=["HS256"])
+    print(f'DecodeDict: {decodeDict}')
+
+    expires_at_obj = datetime.strptime(decodeDict.get("expires_at"), "%Y-%m-%d %H:%M:%S.%f")
+
+    if expires_at_obj <= datetime.now():
+      decodeDict.get("signned") == False
+      raise jwt.ExpiredSignatureError("Token expired")
 
     return decodeDict
   
   def expires_at(self):
     return str(datetime.now() + timedelta(days=7))
   
-  def check_permissions(self, method, url, token):
-    print(f'method: {method} - url {url} - token: {token}')
-    return True if method == "GET" and url[1:].split('/')[0] in ['auth','docs'] else False
+  async def check_permissions(self, method, url, token):
+
+    if method == "GET" and url[1:].split('/')[0] in ['auth','docs']:
+      return True
+    elif url[1:].split('/')[0] in ['auth','docs']:
+      return True
+    elif token:
+      signned = await self.decode_access_token(token.split(' ')[1])
+      return signned.get("signned")
+    return False

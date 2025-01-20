@@ -19,6 +19,6 @@ IncludeRoutes(app)
 @app.middleware("http")
 async def check_authentication(request: Request, call_next):
   token = request.headers.get("Authorization")
-  if not auth.check_permissions(request.method, request.url.path, token):
+  if not await auth.check_permissions(request.method, request.url.path, token):
     return JSONResponse(status_code=403, content={"message": "You are not authorized to access this resource"})
   return await call_next(request)
