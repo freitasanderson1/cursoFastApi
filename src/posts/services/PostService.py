@@ -11,8 +11,8 @@ class PostService:
       PostModel.c.active==active,
       PostModel.c.published==published
     ).limit(limit if limit else None).offset(skip)
-    
-    return await database.fetch_all(query)
+    result = await database.fetch_all(query)
+    return result
   
   async def read(self, post_id: str) -> Record:
     post = await self.__get_by_id(post_id)

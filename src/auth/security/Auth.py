@@ -1,3 +1,6 @@
+from fastapi import HTTPException, Request
+from fastapi.responses import JSONResponse
+
 from auth.serializers import LoginRequest
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
@@ -21,7 +24,7 @@ class Auth:
   
   async def decode_access_token(self, token: str) -> dict:
     decodeDict = jwt.decode(token, key=JWT_SECRET, algorithms=["HS256"])
-    print(f'DecodeDict: {decodeDict}')
+    # print(f'DecodeDict: {decodeDict}')
 
     expires_at_obj = datetime.strptime(decodeDict.get("expires_at"), "%Y-%m-%d %H:%M:%S.%f")
 
@@ -44,3 +47,9 @@ class Auth:
       signned = await self.decode_access_token(token.split(' ')[1])
       return signned.get("signned")
     return False
+  
+  async def check_authentication(self, request: Request):
+    token = request.headers.get("Authorization")
+    if not await self.check_permissions(request.method, request.url.path, token):
+      raise HTTPException(status_code=403, detail="You are not authorized to access this resource") 
+    return True

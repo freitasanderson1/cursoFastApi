@@ -1,21 +1,20 @@
-from fastapi import APIRouter, status
-from typing import Annotated
+from fastapi import APIRouter, status, Depends
 
 from posts.serializers import PostsRequest, PostsResponse, PostUpdate
 from posts.services import PostService
+from auth.security import Auth
 
 service = PostService()
+auth = Auth()
 
-router = APIRouter(prefix='/posts', tags=["posts"])
+router = APIRouter(prefix='/posts', tags=["posts"], dependencies=[Depends(auth.check_authentication)])
 
 @router.get("/", status_code=status.HTTP_200_OK, response_model=list[PostsResponse])
 async def read_post(limit:int = 0, skip:int = 0, published: bool = True, active: bool = True):
-  return await service.read_all(published, limit, skip, active)
+  return await service.read_all(active, published, limit, skip)
 
 @router.get("/{post_id}", status_code=status.HTTP_200_OK, response_model=PostsResponse)
 async def read_post(post_id: str):
-  # token = request.headers.get('authorization')
-
   return await service.read(post_id)
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=PostsResponse)
